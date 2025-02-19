@@ -36,10 +36,17 @@ Le projet est composé des services suivants :
    - Configurer le réseau entre les services
 
 3. **Vérifier que tout fonctionne**
+
+   En mode Docker :
    - Service Config: http://localhost:8080
    - Eureka Dashboard: http://localhost:8081
    - API Gateway: http://localhost:8082
    - RabbitMQ Management: http://localhost:15672 (user: guest, password: guest)
+
+   En mode Local (Maven) :
+   - Service Config: http://localhost:8080
+   - Eureka Dashboard: http://localhost:8761
+   - API Gateway: http://localhost:8079
 
 ## Ordre de démarrage des services
 

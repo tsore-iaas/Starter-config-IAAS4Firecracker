@@ -4,11 +4,21 @@ Ce document liste tous les ports utilisés par les différents services de l'app
 
 ## Services Principaux
 
+### Mode Docker
+
 | Service | Port Externe | Port Interne | Description |
 |---------|--------------|--------------|-------------|
 | service-config | 8080 | 8080 | Serveur de configuration Spring Cloud Config |
 | service-registry | 8081 | 8761 | Serveur Eureka pour la découverte de services |
 | service-proxy | 8082 | 8079 | API Gateway pour le routage des requêtes |
+
+### Mode Local (Maven)
+
+| Service | Port | Description |
+|---------|------|-------------|
+| service-config | 8080 | Serveur de configuration Spring Cloud Config |
+| service-registry | 8761 | Serveur Eureka pour la découverte de services |
+| service-proxy | 8079 | API Gateway pour le routage des requêtes |
 
 ## Services Infrastructure
 
@@ -19,6 +29,8 @@ Ce document liste tous les ports utilisés par les différents services de l'app
 
 ## Accès aux Services
 
+### Mode Docker
+
 - **Service Config**: http://localhost:8080
   - Point d'accès pour la configuration centralisée
 
@@ -26,6 +38,17 @@ Ce document liste tous les ports utilisés par les différents services de l'app
   - Dashboard Eureka: http://localhost:8081
 
 - **API Gateway**: http://localhost:8082
+  - Point d'entrée principal pour les requêtes API
+
+### Mode Local (Maven)
+
+- **Service Config**: http://localhost:8080
+  - Point d'accès pour la configuration centralisée
+
+- **Service Registry (Eureka)**: http://localhost:8761
+  - Dashboard Eureka: http://localhost:8761
+
+- **API Gateway**: http://localhost:8079
   - Point d'entrée principal pour les requêtes API
 
 - **RabbitMQ Management**: http://localhost:15672
