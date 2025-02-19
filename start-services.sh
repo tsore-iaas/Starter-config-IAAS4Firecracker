@@ -58,18 +58,43 @@ start_local() {
     print_info "Démarrage du Service Config..."
     cd service-config
     mvn spring-boot:run &
-    sleep 30  # Attendre que le service config soit prêt
+    
+    # Attendre que le service config soit prêt
+    print_info "Attente du démarrage du Service Config..."
+    while ! curl -s http://localhost:8080/actuator/health &>/dev/null; do
+        sleep 2
+        echo -n "."
+    done
+    echo ""
+    print_success "Service Config est prêt!"
     
     # Démarrage du service registry
     print_info "Démarrage du Service Registry..."
     cd ../service-registry
     mvn spring-boot:run &
-    sleep 20  # Attendre que le service registry soit prêt
+    
+    # Attendre que le service registry soit prêt
+    print_info "Attente du démarrage du Service Registry..."
+    while ! curl -s http://localhost:8761/actuator/health &>/dev/null; do
+        sleep 2
+        echo -n "."
+    done
+    echo ""
+    print_success "Service Registry est prêt!"
     
     # Démarrage du service proxy
     print_info "Démarrage du Service Proxy..."
     cd ../service-proxy
     mvn spring-boot:run &
+    
+    # Attendre que le service proxy soit prêt
+    print_info "Attente du démarrage du Service Proxy..."
+    while ! curl -s http://localhost:8079/actuator/health &>/dev/null; do
+        sleep 2
+        echo -n "."
+    done
+    echo ""
+    print_success "Service Proxy est prêt!"
     
     print_success "Tous les services sont en cours de démarrage!"
     print_info "
