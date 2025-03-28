@@ -2,6 +2,7 @@ version: "3.8"
 
 services:
   service-config:
+    container_name: service-config
     build: ./service-config
     ports:
       - "8080:8080"
@@ -12,6 +13,7 @@ services:
       - microservices-network
 
   service-registry:
+    container_name: service-registry
     build: ./service-registry
     depends_on:
       - service-config
@@ -25,6 +27,7 @@ services:
       - microservices-network
 
   service-proxy:
+    container_name: service-proxy
     build: ./service-proxy
     depends_on:
       - service-config
@@ -39,6 +42,7 @@ services:
       - microservices-network
 
   auth-service:
+    container_name: auth-service
     build: ./auth-service
     depends_on:
       - service-config
@@ -53,6 +57,7 @@ services:
       - microservices-network
 
   rabbitmq:
+    container_name: rabbitmq
     image: rabbitmq:3-management
     ports:
       - "5672:5672"
@@ -61,6 +66,7 @@ services:
       - microservices-network
 
   mysql:
+    container_name: mysql
     image: mysql:8.0
     environment:
       - MYSQL_ALLOW_EMPTY_PASSWORD=yes
@@ -73,6 +79,7 @@ services:
       - microservices-network
 
   postgres:
+    container_name: postgres
     image: postgres:13
     environment:
       - POSTGRES_USER=tsore
