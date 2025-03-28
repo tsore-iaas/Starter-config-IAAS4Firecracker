@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   service-config:
@@ -38,6 +38,22 @@ services:
     networks:
       - microservices-network
 
+  auth-service:
+    build: ./auth-service
+    depends_on:
+      - service-config
+      - service-registry
+    ports:
+      - "8083:9010"
+    environment:
+      - SPRING_APPLICATION_NAME=auth-service
+      - SPRING_CLOUD_CONFIG_URI=http://service-config:8080
+      - SPRING_CONFIG_IMPORT=configserver:http://service-config:8080
+      - POSTGRESQL_HOST=postgres
+      - POSTGRESQL_PORT=5432
+      - EUREKA_HOST=service-registry
+    networks:
+      - microservices-network
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -56,6 +72,17 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - microservices-network
+
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=tsore
+      - POSTGRES_PASSWORD=tsore
+      - POSTGRES_DB=auth_tsore
+    ports:
+      - "5432:5432"
     networks:
       - microservices-network
 
