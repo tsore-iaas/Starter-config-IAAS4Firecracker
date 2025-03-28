@@ -25,12 +25,6 @@ services:
       - SPRING_CONFIG_IMPORT=configserver:http://service-config:8080
     networks:
       - microservices-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761/eureka/apps"]
-      interval: 30s
-      retries: 5
-      start_period: 10s
-      timeout: 10s
 
   service-proxy:
     container_name: service-proxy
