@@ -13,7 +13,7 @@ Le projet est composé des services suivants :
 
 ## Prérequis
 
-- Docker et Docker Compose
+- Docker et Docker Compose 
 - Java 17 ou supérieur
 - Maven
 
