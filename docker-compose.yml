@@ -1,8 +1,7 @@
-version: "3.8"
+version: '3.8'
 
 services:
   service-config:
-    container_name: service-config
     build: ./service-config
     ports:
       - "8080:8080"
@@ -13,7 +12,6 @@ services:
       - microservices-network
 
   service-registry:
-    container_name: service-registry
     build: ./service-registry
     depends_on:
       - service-config
@@ -27,7 +25,6 @@ services:
       - microservices-network
 
   service-proxy:
-    container_name: service-proxy
     build: ./service-proxy
     depends_on:
       - service-config
@@ -41,23 +38,7 @@ services:
     networks:
       - microservices-network
 
-  auth-service:
-    container_name: auth-service
-    build: ./auth-service
-    depends_on:
-      - service-config
-      - service-registry
-    ports:
-      - "8083:9010"
-    environment:
-      - POSTGRESQL_HOST=postgres
-      - POSTGRESQL_PORT=5432
-      - EUREKA_HOST=service-registry:8761
-    networks:
-      - microservices-network
-
   rabbitmq:
-    container_name: rabbitmq
     image: rabbitmq:3-management
     ports:
       - "5672:5672"
@@ -65,30 +46,86 @@ services:
     networks:
       - microservices-network
 
+  service-vm-offers:
+    build: ../service-vm-offers
+    depends_on:
+      - service-config
+      - service-registry
+      - mysql
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_APPLICATION_NAME=service-vm-offers
+      - SPRING_CLOUD_CONFIG_URI=http://service-config:8080
+      - SPRING_CONFIG_IMPORT=configserver:http://service-config:8080
+    networks:
+      - microservices-network
+
+  auth-service:
+    build: ../auth-service
+    depends_on:
+      - service-config
+      - service-registry
+      - postgres
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_APPLICATION_NAME=auth-service
+      - SPRING_CLOUD_CONFIG_URI=http://service-config:8080
+      - SPRING_CONFIG_IMPORT=configserver:http://service-config:8080
+    networks:
+      - microservices-network
+
+
   mysql:
-    container_name: mysql
     image: mysql:8.0
     environment:
-      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
-      - MYSQL_DATABASE=notification_db
+      - MYSQL_DATABASE=service-vm-offers
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./mysql-custom.cnf:/etc/mysql/conf.d/mysql-custom.cnf
     networks:
       - microservices-network
 
-  postgres:
-    container_name: postgres
-    image: postgres:13
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
     environment:
-      - POSTGRES_USER=tsore
-      - POSTGRES_PASSWORD=tsore
-      - POSTGRES_DB=auth_tsore
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PHP_UPLOAD_MAX_FILESIZE: 8G
+      PHP_POST_MAX_SIZE: 8G
+    volumes:
+      - ./php.ini:/usr/local/etc/php/conf.d/uploads.ini
+      - ./phpmyadmin-config.php:/etc/phpmyadmin/config.user.inc.php
     ports:
-      - "5432:5432"
+      - "7098:80"
+    depends_on:
+      - mysql
     networks:
       - microservices-network
+  
+  postgres:
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: tsore
+      POSTGRES_USER: tsore
+      POSTGRES_DB: auth_tsore
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+
+
+
 
 networks:
   microservices-network:
@@ -96,3 +133,4 @@ networks:
 
 volumes:
   mysql_data:
+  pg_data:
