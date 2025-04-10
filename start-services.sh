@@ -147,6 +147,46 @@ start_local() {
         echo ""
         print_success "Service Auth Service est prêt!"
     fi
+
+
+    # Vérifier si le service vmm-service est déjà en cours d'exécution
+    if pgrep -f "uvicorn app:app.*port 8003" > /dev/null; then
+        print_info "Service VMM Service est déjà en cours d'exécution."
+    else
+        # Démarrage du service vm-service dans un nouveau terminal
+        print_info "Démarrage du Service VMM Service..."
+        cd ../vmm-service && uvicorn app:app --host 0.0.0.0 --port 8003 --env-file ./.env --reload > vmm-service.log 2>&1 &
+        cd "$(dirname "$0")"
+        
+        # Attendre que le service vm-service host soit prêt
+        print_info "Attente du démarrage du Service VMM Service..."
+        while ! curl -s http://localhost:8003/health &>/dev/null; do
+            sleep 2
+            echo -n "."
+        done
+        echo ""
+        print_success "Service VMM Service est prêt!"
+    fi
+
+
+    # Vérifier si le service vm-service-host est déjà en cours d'exécution
+    if pgrep -f "start.sh.*-m localhost -p 8000" > /dev/null; then
+        print_info "Service VM Service Host est déjà en cours d'exécution."
+    else
+        # Démarrage du service vm-service-host dans un nouveau terminal
+        print_info "Démarrage du Service VM Service Host..."
+        cd ../vm-service-host && sudo ./start.sh -m localhost -p 8003 -l Cameroun > vm-service-host.log 2>&1 &
+        cd "$(dirname "$0")"
+        
+        # Attendre que le service vm-service host soit prêt
+        print_info "Attente du démarrage du Service VM Service Host..."
+        while ! curl -s http://localhost:8000/health &>/dev/null; do
+            sleep 2
+            echo -n "."
+        done
+        echo ""
+        print_success "Service VM Service Host est prêt!"
+    fi
     
     print_success "Tous les services sont démarrés!"
     print_info "
@@ -155,7 +195,10 @@ start_local() {
     - Service Registry: http://localhost:8761
     - Service Proxy: http://localhost:8079
     - Service VM Offers: http://localhost:8083
-    - Service Auth Service: http://localhost:8084"
+    - Service Auth Service: http://localhost:8084
+    - Service VM Service Host: http://localhost:8000
+    - Service Load Balancer: http://localhost:8001
+    - Service VMM-Service: http://localhost:8003"
 }
 
 # Fonction pour démarrer les services avec Docker
@@ -198,7 +241,9 @@ start_docker() {
     - Service Config: http://localhost:8080
     - Service Registry: http://localhost:8081
     - Service Proxy: http://localhost:8082
-    - RabbitMQ Management: http://localhost:15672"
+    - RabbitMQ Management: http://localhost:15672
+    - Service Load Balancer: http://localhost:8001
+    - Service VMM-Service: http://localhost:8003"
 }
 
 # Menu principal

@@ -1,0 +1,53 @@
+services:
+
+# Service pour la base de données MySQL
+  service_vm_offers_mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    volumes:
+      - service_vm_offers_mysql_data:/var/lib/mysql
+    ports:
+      - 8081:3306
+    environment:
+      MYSQL_DATABASE: service_vm_offers_db
+      MYSQL_USER: service_vm_offers
+      MYSQL_PASSWORD: service_vm_offers
+      MYSQL_ROOT_PASSWORD: service_vm_offers
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p'service_vm_offers'"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    networks:
+      - service_vm_offers_network
+
+# Service pour phpMyAdmin (interface web d'administration MySQL)
+  service_vm_offers_phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: unless-stopped
+    ports:
+      - 8082:80
+    environment:
+      PMA_HOST: service_vm_offers_mysql
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 50G
+      PHP_UPLOAD_MAX_FILESIZE: 50G
+      PHP_POST_MAX_SIZE: 50G
+    depends_on:
+      - service_vm_offers_mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p'service_vm_offers'"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    networks:
+      - service_vm_offers_network
+
+networks:
+  service_vm_offers_network:
+    driver: bridge
+
+volumes:
+  service_vm_offers_mysql_data:
+    
