@@ -155,7 +155,8 @@ start_local() {
     else
         # Démarrage du service vm-service dans un nouveau terminal
         print_info "Démarrage du Service VMM Service..."
-        cd ../vmm-service && uvicorn app:app --host 0.0.0.0 --port 8003 --env-file ./.env --reload > vmm-service.log 2>&1 &
+        cd ../vmm-service && ./start.sh > vmm-service.log 2>&1 &
+#uvicorn app:app --host 0.0.0.0 --port 8003 --env-file ./.env --reload > vmm-service.log 2>&1 &
         cd "$(dirname "$0")"
         
         # Attendre que le service vm-service host soit prêt
@@ -180,7 +181,7 @@ start_local() {
         
         # Attendre que le service vm-service host soit prêt
         print_info "Attente du démarrage du Service VM Service Host..."
-        while ! curl -s http://localhost:8000/health &>/dev/null; do
+        while ! nc -z localhost 8000; do
             sleep 2
             echo -n "."
         done
